@@ -1,0 +1,10 @@
+# Kopiere diese Datei als terraform.tfvars und ersetze nur die Object IDs.
+# Keine realen Zugangsdaten, Tenant IDs, Secrets oder Client Secrets in diese Datei eintragen.
+
+location    = "westeurope"
+environment = "lab"
+project_name = "cloudsecurity"
+
+developer_group_object_id         = "00000000-0000-0000-0000-000000000001"
+reader_group_object_id            = "00000000-0000-0000-0000-000000000002"
+security_operator_group_object_id = "00000000-0000-0000-0000-000000000003"
