@@ -1,0 +1,22 @@
+# Terraform: lokale Konfiguration, State und Provider
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/terraform.tfvars
+terraform/*.tfvars.json
+terraform/crash.log
+terraform/crash.*.log
+
+# Generierte Lab-Artefakte
+artifacts/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Betriebssystem und Editor
+.DS_Store
+.vscode/
+.idea/
