@@ -1,0 +1,39 @@
+// Secure Azure Workload Lab — Detection Queries
+// Diese Queries nach der Datenerfassung im Log Analytics Workspace ausführen.
+// Tabellen und Spalten können sich je nach Azure-Ressource und Diagnosemodus unterscheiden.
+
+// 1. Fehlgeschlagene Key-Vault-Operationen mit Client-IP
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.KEYVAULT"
+| where ResultType !in ("Success", "Succeeded")
+| project TimeGenerated, OperationName, ResultType, ResultDescription, CallerIPAddress, identity_claim_http_schemas_xmlsoap_org_ws_2005_05_identity_claims_upn_s
+| order by TimeGenerated desc
+
+// 2. Auffällige Häufung fehlgeschlagener Key-Vault-Aktionen pro IP in 15 Minuten
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.KEYVAULT"
+| where ResultType !in ("Success", "Succeeded")
+| summarize FailedOperations = count(), Operations = make_set(OperationName, 10) by CallerIPAddress, bin(TimeGenerated, 15m)
+| where FailedOperations >= 3
+| order by FailedOperations desc
+
+// 3. Änderungen an der Lab-Resource-Group im Azure Activity Log
+AzureActivity
+| where ResourceGroup == "rg-cloudsecurity-lab"
+| where CategoryValue == "Administrative"
+| project TimeGenerated, Caller, OperationNameValue, ActivityStatusValue, ResourceId, Claims
+| order by TimeGenerated desc
+
+// 4. Fehlgeschlagene Storage-Zugriffe (Schema abhängig von aktivierten Logs)
+StorageBlobLogs
+| where StatusCode >= 400
+| project TimeGenerated, OperationName, StatusCode, AuthenticationType, CallerIpAddress, Uri
+| order by TimeGenerated desc
+
+// 5. Optional: mehrere fehlgeschlagene Entra-Anmeldungen pro Benutzer.
+// Voraussetzung: SigninLogs wird in den Workspace geleitet.
+SigninLogs
+| where ResultType != 0
+| summarize FailedSignIns = count(), IPs = make_set(IPAddress, 10) by UserPrincipalName, bin(TimeGenerated, 15m)
+| where FailedSignIns >= 5
+| order by FailedSignIns desc
