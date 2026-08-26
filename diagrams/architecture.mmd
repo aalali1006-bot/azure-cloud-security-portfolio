@@ -1,0 +1,16 @@
+flowchart LR
+  classDef actor fill:#e0f2fe,stroke:#0369a1,color:#0c4a6e
+  classDef control fill:#dcfce7,stroke:#15803d,color:#14532d
+  classDef asset fill:#fef3c7,stroke:#b45309,color:#78350f
+  classDef observability fill:#f3e8ff,stroke:#7e22ce,color:#581c87
+
+  U["Admin · Entwickler · Auditor"]:::actor -->|"Entra ID + MFA"| R["Gruppenbasierte Azure RBAC"]:::control
+  R -->|"Resource-Group Scope"| RG["rg-cs-lab"]:::asset
+  RG --> SA["Storage Account\nHTTPS · TLS 1.2 · kein Public Blob Access"]:::control
+  RG --> KV["Key Vault\nRBAC · Soft Delete · Purge Protection"]:::control
+  SA -->|"Diagnostic Settings"| LAW["Log Analytics Workspace"]:::observability
+  KV -->|"Audit Events"| LAW
+  LAW -->|"KQL Detection"| AL["Alert / Incident"]:::observability
+  AL --> IR["IR-Runbook"]:::actor
+  CI["CI: fmt · validate · scan"]:::control --> TF["Terraform"]:::asset
+  TF --> RG
